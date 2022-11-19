@@ -8,7 +8,7 @@ import java.sql.*;
 public class UserDao {
     private static final String CREATE_USER_QUERY = "INSERT INTO workshop2.users(email, username, password) VALUES (?, ?,?)";
     private static final String READ_USER_QUERY = "Select * from workshop2.users where id = ?";
-    private static final String UPDATE_USER_QUERY = "UPDATE workshop2.users set ? = ? WHERE id = ?";
+    private static final String UPDATE_USER_QUERY = "UPDATE workshop2.users set username = ?, email = ?, password =? WHERE id = ?";
     private static final String DELETE_USER_QUERY = "DELETE FROM workshop2.users where id = ?";
     private static final String FINDALL_USER_QUERY = "Select * from workshop2.users";
 
@@ -52,6 +52,19 @@ public class UserDao {
         e.printStackTrace();
     }
     return user;
+    }
+    public void update(User user){
+        try(Connection connection = DbUtil.connect()){
+            PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_USER_QUERY);
+            preparedStatement.setString(1, user.getUserName());
+            preparedStatement.setString(2, user.getEmail());
+            preparedStatement.setString(3, hashPassword(user.getPassword()));
+            preparedStatement.setInt(4,user.getId());
+            preparedStatement.executeUpdate();
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
     }
 
     public static String hashPassword(String password){
