@@ -4,6 +4,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import pl.coderslab.DbUtil;
 
 import java.sql.*;
+import java.util.Arrays;
 
 public class UserDao {
     private static final String CREATE_USER_QUERY = "INSERT INTO workshop2.users(email, username, password) VALUES (?, ?,?)";
@@ -16,7 +17,7 @@ public class UserDao {
 
     }
 
-    public static User create(User user) {
+    public User create(User user) {
         try (Connection connection = DbUtil.connect()) {
             PreparedStatement preparedStatement = connection.prepareStatement(CREATE_USER_QUERY, PreparedStatement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, user.getEmail());
@@ -66,8 +67,24 @@ public class UserDao {
             e.printStackTrace();
         }
     }
+    public void delete(int userId){
+        try(Connection connection = DbUtil.connect()){
+            PreparedStatement statement = connection.prepareStatement(DELETE_USER_QUERY);
+            statement.setInt(1, userId);
+            statement.executeUpdate();
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+   
 
     public static String hashPassword(String password){
         return BCrypt.hashpw(password, BCrypt.gensalt());
+    }
+    public User[] addToArray(User u, User[] users){
+        User[] tmpUsers = Arrays.copyOf(users, users.length +1);
+        tmpUsers[users.length] = u;
+        return users;
     }
 }
