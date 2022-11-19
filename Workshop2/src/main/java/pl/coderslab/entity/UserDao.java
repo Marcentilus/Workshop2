@@ -23,17 +23,37 @@ public class UserDao {
             preparedStatement.setString(2, user.getUserName());
             preparedStatement.setString(3, hashPassword(user.getPassword()));
             preparedStatement.executeUpdate();
-            ResultSet rs = preparedStatement.getGeneratedKeys();
-            if (rs.next()) {
-                long id = rs.getLong(1);
-                user.setId(id);
+            try(ResultSet rs = preparedStatement.getGeneratedKeys()) {
+                if (rs.next()) {
+                    int id = rs.getInt(1);
+                    user.setId(id);
+                }
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return user;
     }
+    public User read(int userId){
+        User user = new User();
+    try(Connection connection = DbUtil.connect()){
+        PreparedStatement statement = connection.prepareStatement(READ_USER_QUERY);
+        statement.setInt(1, userId);
+        try(ResultSet rs = statement.executeQuery()) {
+            while (rs.next()){
+               // System.out.println(rs.getString("username") + " " + rs.getString("email") + " " + rs.getString("password"));
+            user.setId(userId);
+            user.setUserName(rs.getString("username"));
+            user.setEmail(rs.getString("email"));
+            user.setPassword(rs.getString("password"));
+        }
+        }
+    }catch (SQLException e){
+        e.printStackTrace();
+    }
+    return user;
+    }
+
     public static String hashPassword(String password){
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
