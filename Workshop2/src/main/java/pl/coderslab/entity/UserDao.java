@@ -77,7 +77,28 @@ public class UserDao {
             e.printStackTrace();
         }
     }
-   
+    public User[] findAll(){
+        User[] users = new User[0];
+        int counter = 1;
+        try(Connection connection = DbUtil.connect()){
+            Statement statement= connection.createStatement();
+            try(ResultSet rs = statement.executeQuery(FINDALL_USER_QUERY)) {
+                while (rs.next()) {
+                    User user = new User();
+                    user.setId(rs.getInt("id"));
+                    user.setUserName(rs.getString("username"));
+                    user.setEmail(rs.getString("email"));
+                    user.setPassword(rs.getString("password"));
+                    users = addToArray(user, users);
+                }
+            }
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return users;
+    }
+
 
     public static String hashPassword(String password){
         return BCrypt.hashpw(password, BCrypt.gensalt());
@@ -85,6 +106,6 @@ public class UserDao {
     public User[] addToArray(User u, User[] users){
         User[] tmpUsers = Arrays.copyOf(users, users.length +1);
         tmpUsers[users.length] = u;
-        return users;
+        return tmpUsers;
     }
 }
